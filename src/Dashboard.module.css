@@ -1,0 +1,12 @@
+.container {
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: center;
+  justify-content: flex-start;
+  width: 100vw;
+  height: 50vh;
+  padding: 1rem;
+  /* border: 1px solid red; */
+  box-sizing: border-box;
+  overflow: scroll;
+}
