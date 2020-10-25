@@ -1,7 +1,8 @@
 import React from "react";
 import Button from "./Button";
 import Task from "./Task";
-import styles from "./Project.module.css";
+import Card from "./Card";
+import styles from "./Card.module.css";
 
 function ProjectCard({
   name,
@@ -36,17 +37,17 @@ function ProjectCard({
   }
 
   return (
-    <div className={styles.card}>
+    <Card>
       <button onClick={onDeleteProject} className={styles.delete}>
         X
       </button>
-      <div>{name}</div>
+      <div className={styles.cardName}>{name}</div>
       {mapTasks()}
 
       <Button size={"sm"} color="white" type={"add"} onFunc={onAddTask}>
         +
       </Button>
-    </div>
+    </Card>
   );
 }
 

@@ -1,0 +1,51 @@
+.card {
+  position: relative;
+  height: 40vh;
+  width: 15vw;
+  min-width: 200px;
+  /*   border: 1px solid red; */
+  border-radius: 10px;
+  background-color: rgba(29, 30, 34);
+  box-sizing: border-box;
+  padding: 1rem;
+  margin: 1rem;
+  box-sizing: border-box;
+  color: #fff;
+  display: flex;
+  flex-flow: column nowrap;
+  align-items: center;
+  box-shadow: -3px -3px 2px rgba(35, 35, 35, 0.4),
+    7px 7px 7px rgba(20, 20, 20, 0.4);
+  overflow-y: scroll;
+}
+
+.delete {
+  background-color: transparent;
+  position: absolute;
+  transition: all 0.2s ease-in-out;
+  top: 0.2rem;
+  right: 0rem;
+  border: none;
+  color: white;
+  font-size: 0.25rem;
+}
+
+.delete:hover {
+  transform: scale(0.9);
+  cursor: pointer;
+}
+
+.cardName,
+.priority {
+  width: 100%;
+  text-align: center;
+  padding-bottom: 0.1rem;
+  margin-bottom: 0.5rem;
+}
+
+.cardName {
+  border-bottom: 1px solid white;
+}
+
+.date {
+}

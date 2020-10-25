@@ -46,10 +46,19 @@ function Task({ onUpdateTaskFunc, index, projectIndex }) {
   } else {
     return (
       <div className={styles.task}>
-        <form action="" ref={formRef} onKeyPress={onEnter} onBlur={onBlur}>
-          <input placeholder={name} name="name"></input>
-          <input placeholder={due} name="due"></input>
-          <select name="priority">
+        <form
+          className={styles.form}
+          ref={formRef}
+          onKeyPress={onEnter}
+          onBlur={onBlur}
+        >
+          <input
+            placeholder={name}
+            name="name"
+            className={styles.input}
+          ></input>
+          <input placeholder={due} name="due" className={styles.input}></input>
+          <select name="priority" className={styles.select}>
             <option value={1} defaultValue>
               Important | Urgent
             </option>
