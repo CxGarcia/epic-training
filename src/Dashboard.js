@@ -3,50 +3,58 @@ import Button from "./Button";
 import ProjectCard from "./ProjectCard";
 import TaskCard from "./TaskCard";
 import styles from "./Dashboard.module.css";
+import { nanoid } from "nanoid";
 import { addCollection, getCollection, editById } from "./utils/firebase";
 
 function Dashboard() {
-  const [state, dispatch] = useReducer(asyncReducer, { projects: [] });
+  const [state, dispatch] = useReducer(projectTaskReducer, {
+    projects: [],
+    tasks: [],
+  });
 
-  const { projects } = state;
-
-  console.log(state);
-
-  const tasks = projects
-    .map((project) => {
-      return project.tasks;
-    })
-    .flat()
-    .sort((a, b) => parseInt(a.priority) - parseInt(b.priority));
-
-  console.log(tasks);
+  const { projects, tasks } = state;
 
   function onAddProject() {
-    const newProject = { name: "New Project", tasks: [] };
-    dispatch({ type: "CREATE_PROJECT", project: newProject });
+    const id = nanoid(9);
+    const project = { name: "New Project", id: id };
+
+    dispatch({ type: "CREATE_PROJECT", project });
   }
 
-  function onDeleteProject(index) {
-    dispatch({ type: "DELETE_PROJECT", index });
+  function onDeleteProject(projectId) {
+    dispatch({ type: "DELETE_PROJECT", projectId });
   }
 
-  function onAddTask(id, task) {
-    dispatch({ type: "CREATE_TASK", id, task });
+  function onAddTask({ ...props }) {
+    const id = nanoid(9);
+    const task = { name: "New Task", taskId: id, ...props };
+
+    dispatch({ type: "CREATE_TASK", task });
   }
 
-  function onUpdateTask(id, task, projectId) {
-    dispatch({ type: "UPDATE_TASK", id, task, projectId });
+  function onUpdateTask({ ...props }) {
+    const task = { ...props };
+
+    dispatch({ type: "UPDATE_TASK", task });
   }
 
   function mapProjects() {
+    if (!projects) return;
+
     const projectCardArray = projects.map((project, i) => {
-      const { name, tasks } = project;
+      const { name, id } = project;
+
+      const projectTasks = tasks.filter((task) => {
+        return task.projectId === id;
+      });
+
       return (
         <ProjectCard
-          name={name}
-          tasks={tasks}
-          key={i}
-          projectIndex={i}
+          projectName={name}
+          key={id}
+          tasks={projectTasks}
+          projectId={id}
+          index={i}
           onDeleteProjectFunc={onDeleteProject}
           onAddTaskFunc={onAddTask}
           onUpdateTaskFunc={onUpdateTask}
@@ -57,15 +65,16 @@ function Dashboard() {
   }
 
   function mapTasks() {
-    const taskCardArray = tasks.map((task, i) => {
-      const { name, due, priority } = task;
+    const taskCardArray = tasks.map((task) => {
+      const { name, due, priority, taskId, projectId, projectName } = task;
       return (
         <TaskCard
           name={name}
           priority={priority}
-          key={i}
-          projectIndex={i}
+          key={taskId}
+          projectId={projectId}
           onUpdateTaskFunc={onUpdateTask}
+          projectName={projectName}
         />
       );
     });
@@ -87,47 +96,58 @@ function Dashboard() {
 
 export default Dashboard;
 
-function asyncReducer(state, action) {
+function projectTaskReducer(state, action) {
   switch (action.type) {
     case "CREATE_PROJECT": {
       return { ...state, projects: [...state.projects, action.project] };
     }
 
-    case "update": {
-      return { status: "resolved", data: action.data, error: null };
+    case "UPDATE_PROJECT": {
+      return { ...state, projects: [...state.projects, action.project] };
     }
 
     case "DELETE_PROJECT": {
       const projectsCopy = [...state.projects];
+      const tasksCopy = [...state.tasks];
+
       const filteredProjects = projectsCopy.filter((project, i) => {
-        return i !== action.index;
+        return project.id !== action.projectId;
       });
-      return { ...state, projects: [...filteredProjects] };
+
+      const filteredTasks = tasksCopy.filter((task) => {
+        return task.projectId !== action.projectId;
+      });
+
+      return {
+        ...state,
+        projects: [...filteredProjects],
+        tasks: [...filteredTasks],
+      };
     }
 
     case "CREATE_TASK": {
-      const projects = [...state.projects];
-      const currentProject = state.projects[action.id];
-
-      const tasks = [...currentProject.tasks, { name: `${action.task}` }];
-      const newCurrentProject = { ...currentProject, tasks };
-
-      projects[action.id] = newCurrentProject;
-      return { ...state, projects: projects };
+      return { ...state, tasks: [...state.tasks, action.task] };
     }
 
     case "UPDATE_TASK": {
-      const projects = [...state.projects];
-      const currentProject = state.projects[action.projectId];
+      const tasksCopy = [...state.tasks];
 
-      const tasks = currentProject.tasks.map((task, index) => {
-        if (index !== action.id) return task;
+      const newTask = tasksCopy.map((task) => {
+        if (task.taskId !== action.task.taskId) return task;
         else return action.task;
       });
 
-      const newCurrentProject = { ...currentProject, tasks };
-      projects[action.projectId] = newCurrentProject;
-      return { ...state, projects: projects };
+      return { ...state, tasks: [...newTask] };
+    }
+
+    case "DELETE_TASK": {
+      const tasksCopy = [...state.tasks];
+
+      const filteredTasks = tasksCopy.filter((task, i) => {
+        return task.id !== action.taskId;
+      });
+
+      return { ...state, tasks: [...state.tasks, filteredTasks] };
     }
 
     default: {
@@ -136,24 +156,24 @@ function asyncReducer(state, action) {
   }
 }
 
-function useAsync(initialState) {
-  const [state, dispatch] = useReducer(asyncReducer, async () => {
-    const dbProjectCollection = await getCollection("projects");
+// function useAsync(initialState) {
+//   const [state, dispatch] = useReducer(crudReducer, async () => {
+//     const dbProjectCollection = await getCollection("projects");
 
-    return dbProjectCollection;
-  });
+//     return dbProjectCollection;
+//   });
 
-  const run = useCallback((promise) => {
-    dispatch({ type: "pending" });
-    promise.then(
-      (data) => {
-        dispatch({ type: "resolved", data });
-      },
-      (error) => {
-        dispatch({ type: "rejected", error });
-      }
-    );
-  }, []);
+//   const run = useCallback((promise) => {
+//     dispatch({ type: "pending" });
+//     promise.then(
+//       (data) => {
+//         dispatch({ type: "resolved", data });
+//       },
+//       (error) => {
+//         dispatch({ type: "rejected", error });
+//       }
+//     );
+//   }, []);
 
-  return { ...state, run };
-}
+//   return { ...state, run };
+// }

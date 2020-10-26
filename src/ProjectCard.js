@@ -5,31 +5,36 @@ import Card from "./Card";
 import styles from "./Card.module.css";
 
 function ProjectCard({
-  name,
+  projectName,
   tasks,
-  projectIndex,
+  projectId,
   onDeleteProjectFunc,
   onAddTaskFunc,
   onUpdateTaskFunc,
+  index,
 }) {
-  function onAddTask(taskIndex, task) {
-    onAddTaskFunc(projectIndex, taskIndex, task);
+  const projectNameMod = `${projectName} ${index + 1}`;
+
+  function onAddTask() {
+    onAddTaskFunc({ projectId });
   }
 
   function onDeleteProject() {
-    onDeleteProjectFunc(projectIndex);
+    onDeleteProjectFunc(projectId);
   }
 
   function mapTasks() {
     const taskArray = tasks.map((task, i) => {
-      const { name } = task;
+      const { name, taskId } = task;
+
       return (
         <Task
           name={name}
-          key={i}
-          index={i}
+          projectName={projectNameMod}
+          key={taskId}
+          taskId={taskId}
           onUpdateTaskFunc={onUpdateTaskFunc}
-          projectIndex={projectIndex}
+          projectId={projectId}
         />
       );
     });
@@ -41,7 +46,7 @@ function ProjectCard({
       <button onClick={onDeleteProject} className={styles.delete}>
         X
       </button>
-      <div className={styles.cardName}>{name}</div>
+      <div className={styles.cardName}>{projectNameMod}</div>
       {mapTasks()}
 
       <Button size={"sm"} color="white" type={"add"} onFunc={onAddTask}>

@@ -36,7 +36,8 @@
 }
 
 .cardName,
-.priority {
+.priority,
+.projectName {
   width: 100%;
   text-align: center;
   padding-bottom: 0.1rem;

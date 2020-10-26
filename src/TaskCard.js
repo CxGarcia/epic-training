@@ -2,7 +2,12 @@ import React from "react";
 import Card from "./Card";
 import styles from "./Card.module.css";
 
-export default function TaskCard({ name, onDeleteTask, priority }) {
+export default function TaskCard({
+  name,
+  onDeleteTask,
+  priority,
+  projectName,
+}) {
   const priorityObj = {
     1: "IU",
     2: "NIU",
@@ -15,6 +20,7 @@ export default function TaskCard({ name, onDeleteTask, priority }) {
         X
       </button>
       <div className={styles.cardName}>{name}</div>
+      <div className={styles.projectName}>{`${projectName}`}</div>
       <div className={styles.priority}>{priorityObj[priority]}</div>
     </Card>
   );
