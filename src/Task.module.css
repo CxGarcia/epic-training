@@ -44,5 +44,9 @@
   border-bottom: 1px solid rgb(250, 247, 55);
 }
 
+::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+}
+
 .select {
 }

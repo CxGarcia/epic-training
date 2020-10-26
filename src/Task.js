@@ -1,11 +1,15 @@
 import React, { useEffect, useRef, useState } from "react";
 import styles from "./Task.module.css";
+import { parseISO, formatISO, formatDistanceToNowStrict } from "date-fns/esm";
 
 function Task({ onUpdateTaskFunc, projectId, taskId, projectName }) {
+  const dateNow = Date.now();
+  const minDate = formatISO(dateNow, { representation: "date" });
+
   const [state, setState] = useState({
     name: "New Task",
-    due: 2,
     priority: 1,
+    due: formatDistanceToNowStrict(dateNow, { unit: "day" }),
   });
 
   const [focus, setFocus] = useState(false);
@@ -27,36 +31,52 @@ function Task({ onUpdateTaskFunc, projectId, taskId, projectName }) {
 
   function handleChange(event) {
     event.preventDefault();
-    setState({ ...state, [event.target.name]: event.target.value });
-  }
 
-  function onEnter(event) {
-    if (event.key === "Enter") onBlur(event);
-  }
-
-  function onBlur(event) {
-    event.preventDefault();
-    setState({ ...state, [event.target.name]: event.target.value });
-
-    if (!event.currentTarget.contains(event.relatedTarget)) {
-      onChangeFocus();
+    if (event.target.name === "due") {
+      const inputDate = formatDistanceToNowStrict(
+        parseISO(event.target.value),
+        {
+          unit: "day",
+        }
+      );
+      setState({ ...state, [event.target.name]: inputDate });
+    } else {
+      setState({ ...state, [event.target.name]: event.target.value });
     }
   }
 
-  function onChangeFocus() {
+  function handleBlur(event) {
+    event.preventDefault();
+    handleChange(event);
+
+    if (!event.currentTarget.contains(event.relatedTarget)) {
+      handleChangeFocus();
+      return;
+    }
+  }
+
+  function handleEnter(event) {
+    if (event.key === "Enter") handleBlur(event);
+  }
+
+  function handleChangeFocus() {
     setFocus(!focus);
   }
 
   if (!focus) {
     return (
-      <div className={styles.task} onClick={onChangeFocus}>
+      <div className={styles.task} onClick={handleChangeFocus}>
         {name}
       </div>
     );
   } else {
     return (
       <div className={styles.task}>
-        <form className={styles.form} onKeyPress={onEnter} onBlur={onBlur}>
+        <form
+          className={styles.form}
+          onKeyPress={handleEnter}
+          onBlur={handleBlur}
+        >
           <input
             placeholder={name}
             name="name"
@@ -65,11 +85,12 @@ function Task({ onUpdateTaskFunc, projectId, taskId, projectName }) {
             value={name}
           ></input>
           <input
-            placeholder={due}
+            type="date"
             name="due"
+            placeholder={minDate}
             className={styles.input}
             onChange={handleChange}
-            value={due}
+            min={minDate}
           ></input>
           <select name="priority" className={styles.select}>
             <option value={1} defaultValue>

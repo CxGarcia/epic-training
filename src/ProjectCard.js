@@ -12,8 +12,14 @@ function ProjectCard({
   onAddTaskFunc,
   onUpdateTaskFunc,
   index,
+  onUpdateProjectFunc,
 }) {
   const projectNameMod = `${projectName} ${index + 1}`;
+
+  //TODO
+  function handleUpdateProject() {
+    onUpdateProjectFunc({ projectName });
+  }
 
   function onAddTask() {
     onAddTaskFunc({ projectId });
@@ -48,7 +54,6 @@ function ProjectCard({
       </button>
       <div className={styles.cardName}>{projectNameMod}</div>
       {mapTasks()}
-
       <Button size={"sm"} color="white" type={"add"} onFunc={onAddTask}>
         +
       </Button>

@@ -1,10 +1,10 @@
-import React, { useCallback, useEffect, useReducer } from "react";
+import React, { useReducer } from "react";
 import Button from "./Button";
 import ProjectCard from "./ProjectCard";
 import TaskCard from "./TaskCard";
 import styles from "./Dashboard.module.css";
 import { nanoid } from "nanoid";
-import { addCollection, getCollection, editById } from "./utils/firebase";
+// import { addCollection, getCollection, editById } from "./utils/firebase";
 
 function Dashboard() {
   const [state, dispatch] = useReducer(projectTaskReducer, {
@@ -19,6 +19,12 @@ function Dashboard() {
     const project = { name: "New Project", id: id };
 
     dispatch({ type: "CREATE_PROJECT", project });
+  }
+
+  function handleUpdateProject({ ...props }) {
+    const project = { ...props };
+
+    dispatch({ type: "updateProject", project });
   }
 
   function onDeleteProject(projectId) {
@@ -36,6 +42,10 @@ function Dashboard() {
     const task = { ...props };
 
     dispatch({ type: "UPDATE_TASK", task });
+  }
+
+  function handleDeleteTask({ taskId }) {
+    dispatch({ type: "DELETE_TASK", taskId });
   }
 
   function mapProjects() {
@@ -58,6 +68,7 @@ function Dashboard() {
           onDeleteProjectFunc={onDeleteProject}
           onAddTaskFunc={onAddTask}
           onUpdateTaskFunc={onUpdateTask}
+          onUpdateProjectFunc={handleUpdateProject}
         />
       );
     });
@@ -65,16 +76,21 @@ function Dashboard() {
   }
 
   function mapTasks() {
+    if (!tasks) return;
+
     const taskCardArray = tasks.map((task) => {
       const { name, due, priority, taskId, projectId, projectName } = task;
       return (
         <TaskCard
           name={name}
-          priority={priority}
-          key={taskId}
           projectId={projectId}
+          taskId={taskId}
+          priority={priority}
+          due={due}
+          key={taskId}
           onUpdateTaskFunc={onUpdateTask}
           projectName={projectName}
+          handleDeleteTask={handleDeleteTask}
         />
       );
     });
@@ -102,6 +118,7 @@ function projectTaskReducer(state, action) {
       return { ...state, projects: [...state.projects, action.project] };
     }
 
+    //TODO
     case "UPDATE_PROJECT": {
       return { ...state, projects: [...state.projects, action.project] };
     }
@@ -132,22 +149,24 @@ function projectTaskReducer(state, action) {
     case "UPDATE_TASK": {
       const tasksCopy = [...state.tasks];
 
-      const newTask = tasksCopy.map((task) => {
+      const newTasks = tasksCopy.map((task) => {
         if (task.taskId !== action.task.taskId) return task;
         else return action.task;
       });
 
-      return { ...state, tasks: [...newTask] };
+      newTasks.sort((a, b) => parseInt(a.priority) - parseInt(b.priority));
+
+      return { ...state, tasks: [...newTasks] };
     }
 
     case "DELETE_TASK": {
       const tasksCopy = [...state.tasks];
 
-      const filteredTasks = tasksCopy.filter((task, i) => {
-        return task.id !== action.taskId;
+      const filteredTasks = tasksCopy.filter((task) => {
+        return task.taskId !== action.taskId;
       });
 
-      return { ...state, tasks: [...state.tasks, filteredTasks] };
+      return { ...state, tasks: [...filteredTasks] };
     }
 
     default: {
