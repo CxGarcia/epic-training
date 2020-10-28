@@ -27,7 +27,16 @@ function Task({ onUpdateTaskFunc, projectId, taskId, projectName }) {
     }, 1000);
 
     return () => console.log("cleanup");
-  }, [state]);
+  }, [
+    due,
+    name,
+    onUpdateTaskFunc, //useCallback to prevent infinite loop
+    priority,
+    projectId,
+    projectName,
+    state,
+    taskId,
+  ]);
 
   function handleChange(event) {
     event.preventDefault();
